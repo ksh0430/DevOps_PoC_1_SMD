@@ -35,6 +35,7 @@ public class PetClinicApplication extends SpringBootServletInitializer {
         return application.sources(PetClinicApplication.class);
     }
     
+    // aaaaaaa
     public static void main(String[] args) throws Exception {
         SpringApplication.run(PetClinicApplication.class, args);
     }
