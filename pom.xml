@@ -169,7 +169,7 @@
 
       <!-- Spring Boot Actuator displays build-related information if a git.properties 
         file is present at the classpath -->
-      <plugin>
+      <!--<plugin>
         <groupId>pl.project13.maven</groupId>
         <artifactId>git-commit-id-plugin</artifactId>
         <executions>
@@ -186,7 +186,7 @@
           <generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties
           </generateGitPropertiesFilename>
         </configuration>
-      </plugin>
+      </plugin>-->
 
       <plugin>
         <groupId>ro.isdc.wro4j</groupId>
