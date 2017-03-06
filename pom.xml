@@ -241,7 +241,7 @@
         <artifactId>maven-surefire-report-plugin</artifactId>
         <version>2.5</version>
         <configuration>
-          <outputDirectory>${basedir}/tests</outputDirectory>
+          <outputDirectory>${basedir}/target/tests</outputDirectory>
         </configuration>
       </plugin>
     </plugins>
