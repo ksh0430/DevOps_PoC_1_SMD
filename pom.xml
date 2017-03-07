@@ -159,15 +159,13 @@
             <format>xml</format>
           </formats>
           <check />
-          <instrumentation>
-              
-          </instrumentation>
         </configuration>
         <executions>
           <execution>
             <goals>
               <goal>clean</goal>
               <goal>check</goal>
+              <goal>cobertura</goal>
             </goals>
           </execution>
         </executions>
