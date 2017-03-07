@@ -168,7 +168,6 @@
             <goals>
               <goal>clean</goal>
               <goal>check</goal>
-              <goal>test</goal>
             </goals>
           </execution>
         </executions>
