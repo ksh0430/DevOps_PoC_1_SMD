@@ -23,13 +23,6 @@
       set_fact:        
         zip_filename: "target/spring-petclinic-1.4.2.war"        
         zip_dir: "{{ lookup('env', 'PWD') }}/target"
-
-    # ------------------------------------------------------------
-    # Bluemix Deploy
-    # ---
-    - name: CF Push Application
-      shell: "cf push -f manifest.yml -u none --hostname {{ app_name }}"
-      
       
     # ------------------------------------------------------------
     # AWS Deploy
