@@ -1,4 +1,4 @@
 applications:
 - name: devops_poc_1_ews
-  path: spring-petclinic-1.4.2.war
+  path: target/spring-petclinic-1.4.2.war
   memory: 256M
