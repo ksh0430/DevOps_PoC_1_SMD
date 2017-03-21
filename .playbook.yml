@@ -19,15 +19,56 @@
         version: "{{ lookup('pipe', 'date +%Y%m%d-%H%M%S%Z')  }}"
 
     # Create information for archive zip
-    - name: Create zip information
+    - name: Create Artifact information
       set_fact:
-        zip_filename: "{{ app_name }}_{{ version }}.zip"
-        zip_dir: "{{ lookup('env', 'PWD') }}/s3"
+        target_dir: "{{ lookup('env', 'PWD') }}/target"
+        artifact_filename: "{{ target_dir }}/spring-petclinic-1.4.2.war"        
 
     # ------------------------------------------------------------
     # Bluemix Deploy
     # ---
     - name: CF Push Application
       shell: "cf push -f manifest.yml -u none --hostname {{ app_name }}"
+      
+      
+    # ------------------------------------------------------------
+    # AWS Deploy
+    # ---
+    - name: push to s3
+      s3:
+        mode: put
+        region: "{{ region }}"
+        bucket: "{{ s3_bucket }}"
+        src: "{{ target_dir }}/{{ artifact_filename }}"
+        object: "{{ artifact_filename }}"
+        
+    # ansible elastic beanstalk: https://github.com/hsingh/ansible-elastic-beanstalk
+    # Create beanstalk app
+    - name: Create Elastic Beanstalk application
+      elasticbeanstalk_app:
+        region: "{{ region }}"
+        app_name: "{{ app_name }}"
+        state: present
+      register: app_output
 
-   
+    # Connect to s3 bucket version
+    - name: Link uploaded version
+      elasticbeanstalk_version:
+        region: "{{ region }}"
+        app_name: "{{ app_name }}"
+        version_label: "{{ version }}"
+        s3_bucket: "{{ s3_bucket  }}"
+        s3_key: "{{artifact_filename}}"
+        state: present
+      register: version_output
+
+    # Create the environment
+    - name: Create app env
+      elasticbeanstalk_env:
+        region: "{{ region }}"
+        app_name: "{{ app_name }}"
+        env_name: "{{ app_name }}-env"
+        version_label: "{{ version }}"
+        solution_stack_name: "{{ solution_stack_name }}"
+      register: env_output
+    # ------------------------------------------------------------
