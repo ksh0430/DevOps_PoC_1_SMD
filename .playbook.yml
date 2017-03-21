@@ -20,9 +20,9 @@
 
     # Create information for archive zip
     - name: Create Artifact information
-      set_fact:
-        target_dir: "{{ lookup('env', 'PWD') }}/target"
-        artifact_filename: "{{ target_dir }}/spring-petclinic-1.4.2.war"        
+      set_fact:        
+        zip_filename: "target/spring-petclinic-1.4.2.war"        
+		zip_dir: "{{ lookup('env', 'PWD') }}/target"
 
     # ------------------------------------------------------------
     # Bluemix Deploy
@@ -39,8 +39,8 @@
         mode: put
         region: "{{ region }}"
         bucket: "{{ s3_bucket }}"
-        src: "{{ target_dir }}/{{ artifact_filename }}"
-        object: "{{ artifact_filename }}"
+        src: "{{ zip_dir }}/{{ zip_filename }}"
+        object: "{{ zip_filename }}"
         
     # ansible elastic beanstalk: https://github.com/hsingh/ansible-elastic-beanstalk
     # Create beanstalk app
@@ -58,7 +58,7 @@
         app_name: "{{ app_name }}"
         version_label: "{{ version }}"
         s3_bucket: "{{ s3_bucket  }}"
-        s3_key: "{{artifact_filename}}"
+        s3_key: "{{zip_filename}}"
         state: present
       register: version_output
 
@@ -71,4 +71,4 @@
         version_label: "{{ version }}"
         solution_stack_name: "{{ solution_stack_name }}"
       register: env_output
-    # ------------------------------------------------------------
+# ------------------------------------------------------------
