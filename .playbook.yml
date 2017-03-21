@@ -1,0 +1,33 @@
+# Publish this application to bluemix using ansible
+---
+- name: Publish the app to AWS
+  hosts: localhost
+  connection: local
+  vars:
+    app_name: "{{ lookup('env','APP_NAME') }}"
+    s3_bucket: "{{ lookup('env', 'S3_BUCKET') | default(app_name,true) }}"
+    region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('us-west-2', true) }}"
+    solution_stack_name: "64bit Amazon Linux 2016.09 v2.5.3 running Tomcat 8 Java 8"
+
+  tasks:
+    # ------------------------------------------------------------
+    # Set Facts
+    # ---
+    # Store datetime for version info
+    - name: Create version string
+      set_fact:
+        version: "{{ lookup('pipe', 'date +%Y%m%d-%H%M%S%Z')  }}"
+
+    # Create information for archive zip
+    - name: Create zip information
+      set_fact:
+        zip_filename: "{{ app_name }}_{{ version }}.zip"
+        zip_dir: "{{ lookup('env', 'PWD') }}/s3"
+
+    # ------------------------------------------------------------
+    # Bluemix Deploy
+    # ---
+    - name: CF Push Application
+      shell: "cf push -f manifest.yml -u none --hostname {{ app_name }}"
+
+   
