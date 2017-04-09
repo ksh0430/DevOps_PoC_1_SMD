@@ -1,0 +1,21 @@
+---
+- name: Publish the app to AWS
+  hosts: localhost
+  connection: local
+  vars:
+    app_name: "{{ lookup('env','APP_NAME') }}"
+    s3_bucket: "{{ lookup('env', 'S3_BUCKET') | default(app_name,true) }}"
+    region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('ap-southeast-2', true) }}"
+    solution_stack_name: "64bit Amazon Linux 2016.09 v2.5.3 running Tomcat 8 Java 8"
+    access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+    secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+
+  tasks:
+    # ------------------------------------------------------------
+    # ECS Deploy
+    # ---
+    - name: reload task
+      test_ecs:
+        mode: put
+        region: "{{ region }}"
+      register: app_output
