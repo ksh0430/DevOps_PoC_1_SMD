@@ -9,6 +9,9 @@
     solution_stack_name: "64bit Amazon Linux 2016.09 v2.5.3 running Tomcat 8 Java 8"
     access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
     secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+    cluster_name: "{{ lookup('env','AWS_CLUSTER_NAME') }}"
+    service_name: "{{ lookup('env','AWS_SERVICE_NAME') }}"
+    task_name: "{{ lookup('env','AWS_TASK_NAME') }}"
 
   tasks:
     # ------------------------------------------------------------
@@ -16,8 +19,9 @@
     # ---
     - name: reload task
       test_ecs:
-        mode: put
         region: "{{ region }}"
         access_key: "{{ access_key }}"
         secret_key: "{{ secret_key }}"
-      register: app_output
+        cluster_name: "{{ cluster_name }}"
+        service_name: "{{ service_name }}"
+        task_name: "{{ task_name }}"
