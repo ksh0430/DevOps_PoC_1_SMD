@@ -1,0 +1,76 @@
+# Publish this application to bluemix using ansible
+---
+- name: Publish the app to AWS EC2
+  hosts: localhost
+  connection: local
+  vars:
+    app_name: "{{ lookup('env','APP_NAME') }}"
+    s3_bucket: "{{ lookup('env', 'S3_BUCKET') | default(app_name,true) }}"
+    region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('us-west-2', true) }}"
+    cluster_name: "{{ lookup('env', 'CLUSTER_NAME') | default('default', true) }}"
+
+  tasks:
+    # ------------------------------------------------------------
+    # Create an ECS Cluster
+    # ---
+    # http://docs.ansible.com/ansible/ecs_service_module.html
+    - name: Wait for register
+      ecs_cluster:
+        name: "{{ cluster_name }}"
+        state: present
+        region: "{{ region }}"
+      register: result
+
+    - debug: msg="{{ result }}"
+    
+    # ------------------------------------------------------------
+    # Create a taskdef
+    # ---
+    # http://docs.ansible.com/ansible/ecs_taskdefinition_module.html
+    - name: Create task definition
+      ecs_taskdefinition:
+        containers:
+        - name: simple-app
+          cpu: 10
+          essential: true
+          image: "httpd:2.4"
+          memory: 300
+          mountPoints:
+          - containerPath: /usr/local/apache2/htdocs
+            sourceVolume: my-vol
+          portMappings:
+          - containerPort: 80
+            hostPort: 80
+        - name: busybox
+          command:
+            - >
+              /bin/sh -c "while true; do echo '<html><head><title>Amazon ECS Sample App</title></head><body><div><h1>Amazon ECS Sample App</h1><h2>Congratulations!
+              </h2><p>Your application is now running on a container in Amazon ECS.</p>' > top; /bin/date > date ; echo '</div></body></html>' > bottom;
+              cat top date bottom > /usr/local/apache2/htdocs/index.html ; sleep 1; done"
+          cpu: 10
+          entryPoint:
+          - sh
+          - "-c"
+          essential: false
+          image: busybox
+          memory: 200
+          volumesFrom:
+          - sourceContainer: simple-app
+        volumes:
+        - name: my-vol
+        family: "{{ cluster_name }}-taskdef"
+        state: present
+      register: create_task_output
+
+    # ------------------------------------------------------------
+    # Run the taskdef
+    # ---
+    # http://docs.ansible.com/ansible/ecs_task_module.html
+    - name: Run task
+      ecs_task:
+        operation: run
+        cluster: "{{ cluster_name }}"
+        task_definition: "{{ cluster_name }}-taskdef"
+        count: 1
+        started_by: ansible_user
+register: run_task_output
