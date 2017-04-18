@@ -1,0 +1,29 @@
+# Publish this application to bluemix using ansible
+---
+- name: Publish the app to AWS ECS
+  hosts: localhost
+  connection: local
+  vars:
+    app_name: "{{ lookup('env','APP_NAME') }}"
+    s3_bucket: "{{ lookup('env', 'S3_BUCKET') | default(app_name,true) }}"
+    region: "{{ lookup('env', 'AWS_DEFAULT_REGION') | default('ap-southeast-2', true) }}"
+    cluster_name: "{{ lookup('env', 'CLUSTER_NAME') | default('cluster-poc', true) }}"
+    td_name: "{{ lookup('env', 'TASK_DEFINITION') | default('td-poc', true) }}"
+    aws_access_key: "{{ lookup('env','AWS_ACCESS_KEY_ID') }}"
+    aws_secret_key: "{{ lookup('env','AWS_SECRET_ACCESS_KEY') }}"
+
+  tasks:
+    - name: Stop task
+      stop_task_infra:
+        access_key: "{{ aws_access_key }}"
+        secret_key: "{{ aws_secret_key }}"  
+        region: "{{ region }}"
+
+    - name: Run task
+      ecs_task:
+        operation: run
+        cluster: "{{ cluster_name }}"
+        task_definition: "{{ td_name }}"
+        count: 1
+        started_by: ansible_user
+      register: task_output
